@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Resume writing service API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: orders
+    description: Order management
+  - name: services
+    description: Service packages
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,170 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /services:
+    get:
+      operationId: listServices
+      tags: [services]
+      summary: List all service packages
+      description: Returns all available resume service packages with pricing and features
+      responses:
+        "200":
+          description: List of service packages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServicePackage"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      description: Submit a new resume writing order with customer details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      operationId: listOrders
+      tags: [orders, admin]
+      summary: List all orders (admin)
+      description: Returns all orders for the admin panel
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get a specific order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders/{orderId}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders, admin]
+      summary: Update order status (admin)
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderStatusBody"
+      responses:
+        "200":
+          description: Order status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Invalid status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders/{orderId}/payment-proof:
+    post:
+      operationId: uploadPaymentProof
+      tags: [orders]
+      summary: Upload payment screenshot and transaction ID
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadPaymentProofBody"
+      responses:
+        "200":
+          description: Payment proof uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders/stats:
+    get:
+      operationId: getOrderStats
+      tags: [orders, admin]
+      summary: Get order statistics (admin)
+      description: Summary counts by status for admin dashboard
+      responses:
+        "200":
+          description: Order statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +204,198 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    ServicePackage:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        price:
+          type: number
+        deliveryDays:
+          type: integer
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        isPopular:
+          type: boolean
+      required:
+        - id
+        - name
+        - slug
+        - price
+        - deliveryDays
+        - description
+        - features
+        - isPopular
+
+    AddOn:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+      required:
+        - id
+        - name
+        - price
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        orderId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        targetJobRole:
+          type: string
+        workExperience:
+          type: string
+        additionalNotes:
+          type: ["string", "null"]
+        servicePackage:
+          type: string
+        addOns:
+          type: array
+          items:
+            type: string
+        totalAmount:
+          type: number
+        resumeFileUrl:
+          type: ["string", "null"]
+        paymentScreenshotUrl:
+          type: ["string", "null"]
+        transactionId:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum:
+            - pending_payment
+            - pending_verification
+            - confirmed
+            - in_progress
+            - delivered
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - orderId
+        - name
+        - email
+        - phone
+        - targetJobRole
+        - workExperience
+        - servicePackage
+        - addOns
+        - totalAmount
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateOrderBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        targetJobRole:
+          type: string
+        workExperience:
+          type: string
+        additionalNotes:
+          type: ["string", "null"]
+        servicePackage:
+          type: string
+        addOns:
+          type: array
+          items:
+            type: string
+        totalAmount:
+          type: number
+      required:
+        - name
+        - email
+        - phone
+        - targetJobRole
+        - workExperience
+        - servicePackage
+        - addOns
+        - totalAmount
+
+    UpdateOrderStatusBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - pending_payment
+            - pending_verification
+            - confirmed
+            - in_progress
+            - delivered
+      required:
+        - status
+
+    UploadPaymentProofBody:
+      type: object
+      properties:
+        paymentScreenshotUrl:
+          type: string
+        transactionId:
+          type: ["string", "null"]
+      required:
+        - paymentScreenshotUrl
+
+    OrderStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        pendingPayment:
+          type: integer
+        pendingVerification:
+          type: integer
+        confirmed:
+          type: integer
+        inProgress:
+          type: integer
+        delivered:
+          type: integer
+        totalRevenue:
+          type: number
+      required:
+        - total
+        - pendingPayment
+        - pendingVerification
+        - confirmed
+        - inProgress
+        - delivered
+        - totalRevenue
