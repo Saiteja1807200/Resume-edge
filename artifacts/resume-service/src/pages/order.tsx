@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CheckCircle, ArrowLeft, ArrowRight, Clock, Upload, Smartphone, Copy, Check } from "lucide-react";
+import { CheckCircle, ArrowLeft, ArrowRight, Clock, Upload, Smartphone, Check } from "lucide-react";
 import {
   useListServices,
   useCreateOrder,
@@ -32,8 +32,6 @@ const detailsSchema = z.object({
 });
 
 type DetailsFormValues = z.infer<typeof detailsSchema>;
-
-const UPI_ID = "resumeedge@upi";
 
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
@@ -68,11 +66,11 @@ export default function Order() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [screenshotDataUrl, setScreenshotDataUrl] = useState<string | null>(null);
   const [screenshotFileName, setScreenshotFileName] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"phonepe" | "googlepay">("phonepe");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -103,12 +101,6 @@ export default function Order() {
     setSelectedAddOns((prev) =>
       prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
     );
-  }
-
-  function handleCopyUpi() {
-    navigator.clipboard.writeText(UPI_ID);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -459,6 +451,7 @@ export default function Order() {
         {/* Step 3: Make Payment */}
         {step === 3 && (
           <div data-testid="step-make-payment">
+            {/* Amount banner */}
             <div className="bg-accent/30 border border-primary/20 rounded-xl p-4 mb-6 flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">Amount to pay</p>
               <p className="text-2xl font-bold text-foreground" data-testid="text-payment-amount">
@@ -469,65 +462,98 @@ export default function Order() {
             <div className="bg-card border border-border rounded-xl p-6 mb-6">
               <div className="flex items-center gap-2 mb-5">
                 <Smartphone className="h-4 w-4 text-primary" />
-                <h2 className="font-semibold text-foreground">Pay via UPI</h2>
+                <h2 className="font-semibold text-foreground">Choose payment method</h2>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-6 items-start">
-                {/* QR Code Placeholder */}
-                <div
-                  className="w-40 h-40 shrink-0 border-2 border-border rounded-lg flex flex-col items-center justify-center bg-muted/30 mx-auto sm:mx-0"
-                  data-testid="qr-code-placeholder"
+              {/* Payment method tabs */}
+              <div className="flex gap-3 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("phonepe")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all ${
+                    paymentMethod === "phonepe"
+                      ? "border-[#5f259f] bg-[#5f259f]/10 text-[#5f259f]"
+                      : "border-border bg-muted/30 text-muted-foreground hover:border-[#5f259f]/40"
+                  }`}
+                  data-testid="tab-phonepe"
                 >
-                  <div className="grid grid-cols-3 gap-1 mb-2">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`w-3 h-3 rounded-sm ${[0, 2, 4, 6, 8].includes(i) ? "bg-foreground" : "bg-muted"}`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground text-center mt-1 font-medium">UPI QR Code</p>
-                </div>
+                  <span className="text-lg">
+                    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="48" height="48" rx="10" fill="#5f259f"/>
+                      <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="22" fontWeight="bold" fontFamily="sans-serif">Pe</text>
+                    </svg>
+                  </span>
+                  PhonePe
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("googlepay")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all ${
+                    paymentMethod === "googlepay"
+                      ? "border-[#1a73e8] bg-[#1a73e8]/10 text-[#1a73e8]"
+                      : "border-border bg-muted/30 text-muted-foreground hover:border-[#1a73e8]/40"
+                  }`}
+                  data-testid="tab-googlepay"
+                >
+                  <span className="text-lg">
+                    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="48" height="48" rx="10" fill="white" stroke="#e0e0e0"/>
+                      <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="#1a73e8" fontSize="14" fontWeight="bold" fontFamily="sans-serif">G</text>
+                    </svg>
+                  </span>
+                  Google Pay
+                </button>
+              </div>
 
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Scan this QR with PhonePe or Google Pay, or pay directly to the UPI ID below.
-                  </p>
-                  <div className="bg-muted/50 rounded-lg p-3 flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-[11px] text-muted-foreground mb-0.5">UPI ID</p>
-                      <p className="font-mono font-semibold text-foreground" data-testid="text-upi-id">{UPI_ID}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCopyUpi}
-                      className="shrink-0"
-                      data-testid="button-copy-upi"
-                    >
-                      {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2 text-sm">
-                      <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">1</span>
-                      <span className="text-muted-foreground">Open PhonePe or Google Pay</span>
-                    </div>
-                    <div className="flex items-start gap-2 text-sm">
-                      <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">2</span>
-                      <span className="text-muted-foreground">
-                        Enter exact amount: <span className="font-semibold text-foreground">${totalAmount}</span>
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2 text-sm">
-                      <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</span>
-                      <span className="text-muted-foreground">Take a screenshot of the payment confirmation</span>
-                    </div>
-                    <div className="flex items-start gap-2 text-sm">
-                      <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">4</span>
-                      <span className="text-muted-foreground">Click continue and upload the screenshot</span>
-                    </div>
-                  </div>
+              {/* QR Code */}
+              <div className="flex flex-col items-center mb-6">
+                {paymentMethod === "phonepe" ? (
+                  <img
+                    src="/phonepe-qr.png"
+                    alt="PhonePe QR Code"
+                    className="w-56 h-56 rounded-xl object-contain border border-border"
+                    data-testid="qr-phonepe"
+                  />
+                ) : (
+                  <img
+                    src="/googlepay-qr.jpg"
+                    alt="Google Pay QR Code"
+                    className="w-56 h-56 rounded-xl object-contain border border-border bg-white"
+                    data-testid="qr-googlepay"
+                  />
+                )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  Scan with {paymentMethod === "phonepe" ? "PhonePe" : "Google Pay"} camera
+                </p>
+              </div>
+
+              {/* Instructions */}
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">1</span>
+                  <span className="text-muted-foreground">
+                    Open <span className="font-medium text-foreground">{paymentMethod === "phonepe" ? "PhonePe" : "Google Pay"}</span> and tap <span className="font-medium text-foreground">Scan QR</span>
+                  </span>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">2</span>
+                  <span className="text-muted-foreground">
+                    Point your camera at the QR code above
+                  </span>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</span>
+                  <span className="text-muted-foreground">
+                    Enter exact amount: <span className="font-semibold text-foreground">${totalAmount}</span> and complete payment
+                  </span>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">4</span>
+                  <span className="text-muted-foreground">Take a screenshot of the payment confirmation</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">5</span>
+                  <span className="text-muted-foreground">Click continue below and upload the screenshot</span>
                 </div>
               </div>
             </div>
