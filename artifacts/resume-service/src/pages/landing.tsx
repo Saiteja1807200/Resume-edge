@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { CheckCircle, ArrowRight, Clock, FileText, Users, Star, Zap, Shield } from "lucide-react";
+import { CheckCircle, ArrowRight, Clock, FileText, Star, Shield, Zap } from "lucide-react";
 import { useListServices } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,7 @@ const PROCESS_STEPS = [
   {
     step: "01",
     title: "Select your package",
-    description: "Choose a service tier that fits your experience level and timeline. Add-ons available.",
+    description: "Choose a service tier that fits your experience level and urgency. Add-ons available.",
   },
   {
     step: "02",
@@ -39,6 +39,22 @@ const PROCESS_STEPS = [
     description: "Get a tailored, ATS-ready resume delivered to your inbox within the promised timeframe.",
   },
 ];
+
+const COMPANIES = [
+  { name: "Google", abbr: "G" },
+  { name: "Amazon", abbr: "A" },
+  { name: "Microsoft", abbr: "M" },
+  { name: "Deloitte", abbr: "D" },
+  { name: "TCS", abbr: "T" },
+  { name: "Infosys", abbr: "I" },
+  { name: "Wipro", abbr: "W" },
+  { name: "Accenture", abbr: "Ac" },
+];
+
+function DeliveryLabel({ hours }: { hours: number }) {
+  if (hours === 1) return <span>{hours}-hour delivery</span>;
+  return <span>{hours}-hour delivery</span>;
+}
 
 export default function Landing() {
   const { data: services, isLoading } = useListServices();
@@ -63,41 +79,91 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-24">
-        <div className="max-w-3xl">
-          <Badge variant="secondary" className="mb-5 text-xs font-medium" data-testid="badge-hero">
-            ATS-optimized resume writing
-          </Badge>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight" data-testid="heading-hero">
-            Resumes tailored to specific job roles and ATS systems
-          </h1>
-          <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl" data-testid="text-hero-description">
-            Most resumes fail before a human sees them. We build resumes that pass automated screening, match recruiter expectations, and are structured around the exact role you are targeting.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-3">
-            <Link href="/order">
-              <Button size="lg" className="w-full sm:w-auto" data-testid="button-order-now">
-                Order your resume <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <a href="#services">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto" data-testid="button-view-packages">
-                View packages
-              </Button>
-            </a>
-          </div>
-          <div className="mt-10 flex flex-wrap gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2" data-testid="stat-delivery">
-              <Clock className="h-4 w-4 text-primary" />
-              <span>2–5 day delivery</span>
+      <section className="relative overflow-hidden">
+        {/* Background grid */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        {/* Gradient blob */}
+        <div
+          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-10 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)" }}
+        />
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-24">
+          <div className="max-w-3xl">
+            <Badge variant="secondary" className="mb-5 text-xs font-medium gap-1.5" data-testid="badge-hero">
+              <Zap className="h-3 w-3 text-primary" />
+              Results in as little as 1 hour
+            </Badge>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight" data-testid="heading-hero">
+              Resumes built to{" "}
+              <span className="relative">
+                <span className="relative z-10 text-primary">company standards</span>
+                <span
+                  className="absolute -bottom-1 left-0 right-0 h-3 opacity-20 rounded"
+                  style={{ background: "hsl(var(--primary))" }}
+                />
+              </span>
+              <br />and ATS systems
+            </h1>
+
+            <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl" data-testid="text-hero-description">
+              Most resumes fail before a human sees them. We write resumes tailored to the exact job role and formatted to the hiring standards of specific companies — structured for recruiter screening and ATS filters.
+            </p>
+
+            {/* Company logos row */}
+            <div className="mt-8 mb-10">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Formatted for company standards at
+              </p>
+              <div className="flex flex-wrap gap-2" data-testid="company-logos">
+                {COMPANIES.map((c) => (
+                  <div
+                    key={c.name}
+                    className="px-3 py-1.5 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:border-primary/40 hover:bg-accent/30 transition-colors"
+                    data-testid={`badge-company-${c.name}`}
+                  >
+                    {c.name}
+                  </div>
+                ))}
+                <div className="px-3 py-1.5 rounded-lg border border-dashed border-border text-sm text-muted-foreground">
+                  + more
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2" data-testid="stat-ats">
-              <Shield className="h-4 w-4 text-primary" />
-              <span>ATS-tested formatting</span>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/order">
+                <Button size="lg" className="w-full sm:w-auto" data-testid="button-order-now">
+                  Order your resume <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <a href="#services">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto" data-testid="button-view-packages">
+                  View packages
+                </Button>
+              </a>
             </div>
-            <div className="flex items-center gap-2" data-testid="stat-revisions">
-              <FileText className="h-4 w-4 text-primary" />
-              <span>Revisions included</span>
+
+            <div className="mt-10 flex flex-wrap gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2" data-testid="stat-delivery">
+                <Clock className="h-4 w-4 text-primary" />
+                <span>Delivered in 1–5 hours</span>
+              </div>
+              <div className="flex items-center gap-2" data-testid="stat-ats">
+                <Shield className="h-4 w-4 text-primary" />
+                <span>ATS-tested formatting</span>
+              </div>
+              <div className="flex items-center gap-2" data-testid="stat-company">
+                <FileText className="h-4 w-4 text-primary" />
+                <span>Company-standard layouts</span>
+              </div>
             </div>
           </div>
         </div>
@@ -111,7 +177,7 @@ export default function Landing() {
               Service packages
             </h2>
             <p className="mt-3 text-muted-foreground max-w-xl">
-              Three tiers designed for different career stages and urgency levels.
+              Three tiers designed for different career stages and urgency levels. All delivered within hours.
             </p>
           </div>
           {isLoading ? (
@@ -145,15 +211,15 @@ export default function Landing() {
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">{pkg.description}</p>
                   </div>
-                  <div className="mb-5">
+                  <div className="mb-2">
                     <span className="text-3xl font-bold text-foreground" data-testid={`text-service-price-${pkg.id}`}>
-                      ₹{pkg.price.toLocaleString()}
+                      ${pkg.price}
                     </span>
                     <span className="text-muted-foreground text-sm ml-1">one-time</span>
                   </div>
-                  <div className="text-xs font-medium text-primary mb-4 flex items-center gap-1">
+                  <div className="text-xs font-medium text-primary mb-5 flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {pkg.deliveryDays}-day delivery
+                    <DeliveryLabel hours={pkg.deliveryDays} />
                   </div>
                   <ul className="space-y-2.5 mb-8 flex-1">
                     {pkg.features.map((f, i) => (
@@ -177,7 +243,7 @@ export default function Landing() {
             </div>
           )}
           <p className="mt-6 text-sm text-muted-foreground text-center">
-            Add-ons available at checkout: Express Delivery (+₹499) and ATS Optimization Boost (+₹299)
+            Add-ons available at checkout: Express Delivery and ATS Optimization Boost
           </p>
         </div>
       </section>
@@ -241,23 +307,31 @@ export default function Landing() {
       {/* CTA */}
       <section className="py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="bg-primary rounded-2xl p-10 sm:p-14 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-4">
-              Stop sending a resume that isn't working
-            </h2>
-            <p className="text-primary-foreground/80 text-base sm:text-lg mb-8 max-w-xl mx-auto">
-              Get an ATS-optimized, recruiter-structured resume tailored to the specific role you're targeting.
-            </p>
-            <Link href="/order">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="font-semibold"
-                data-testid="button-cta-final"
-              >
-                Order your resume now <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+          <div className="bg-primary rounded-2xl p-10 sm:p-14 text-center relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: "radial-gradient(circle at 20% 50%, white 0%, transparent 50%), radial-gradient(circle at 80% 20%, white 0%, transparent 40%)",
+              }}
+            />
+            <div className="relative">
+              <h2 className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-4">
+                Stop sending a resume that isn't working
+              </h2>
+              <p className="text-primary-foreground/80 text-base sm:text-lg mb-8 max-w-xl mx-auto">
+                Get an ATS-optimized, company-standard resume tailored to the exact role and company you're targeting. Ready in as little as 1 hour.
+              </p>
+              <Link href="/order">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="font-semibold"
+                  data-testid="button-cta-final"
+                >
+                  Order your resume now <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -266,7 +340,7 @@ export default function Landing() {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">ResumeEdge</span>
-          <span>Resumes structured for recruiter screening and ATS systems</span>
+          <span>Resumes structured for recruiter screening and company standards</span>
         </div>
       </footer>
     </div>
