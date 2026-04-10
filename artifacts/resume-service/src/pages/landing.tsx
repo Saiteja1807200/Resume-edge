@@ -113,7 +113,28 @@ export default function Landing() {
               <br />and ATS systems
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl" data-testid="text-hero-description">
+            <div className="mt-6 mb-2">
+              <span
+                className="inline text-2xl sm:text-3xl font-bold text-foreground leading-snug"
+                data-testid="text-hero-highlight"
+              >
+                <span
+                  className="relative inline"
+                  style={{
+                    backgroundImage: "linear-gradient(120deg, hsl(var(--primary) / 0.18) 0%, hsl(var(--primary) / 0.22) 100%)",
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "100% 88%",
+                    backgroundPosition: "0 60%",
+                    paddingLeft: "4px",
+                    paddingRight: "4px",
+                  }}
+                >
+                  Stop sending a resume that isn't working.
+                </span>
+              </span>
+            </div>
+
+            <p className="mt-4 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl" data-testid="text-hero-description">
               Most resumes fail before a human sees them. We write resumes tailored to the exact job role and formatted to the hiring standards of specific companies — structured for recruiter screening and ATS filters.
             </p>
 
