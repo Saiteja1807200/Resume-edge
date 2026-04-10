@@ -240,7 +240,7 @@ export default function Order() {
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-xl font-bold text-foreground" data-testid={`text-plan-price-${pkg.id}`}>
-                          ${pkg.price}
+                          ₹{pkg.price}
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center justify-end gap-1 mt-0.5">
                           <Clock className="h-3 w-3" />
@@ -277,7 +277,7 @@ export default function Order() {
                           <p className="font-medium text-sm text-foreground">{ao.name}</p>
                           <p className="text-xs text-muted-foreground">{ao.description}</p>
                         </div>
-                        <p className="font-semibold text-sm text-foreground shrink-0">+${ao.price}</p>
+                        <p className="font-semibold text-sm text-foreground shrink-0">+₹{ao.price}</p>
                       </div>
                     ))}
                   </div>
@@ -296,7 +296,7 @@ export default function Order() {
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">Total</p>
                       <p className="text-xl font-bold text-foreground" data-testid="text-total-amount">
-                        ${totalAmount}
+                        ₹{totalAmount}
                       </p>
                     </div>
                   </div>
@@ -329,7 +329,7 @@ export default function Order() {
                     </p>
                   )}
                 </div>
-                <p className="font-bold text-foreground" data-testid="text-total-step2">${totalAmount}</p>
+                <p className="font-bold text-foreground" data-testid="text-total-step2">₹{totalAmount}</p>
               </div>
             )}
 
@@ -455,7 +455,7 @@ export default function Order() {
             <div className="bg-accent/30 border border-primary/20 rounded-xl p-4 mb-6 flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">Amount to pay</p>
               <p className="text-2xl font-bold text-foreground" data-testid="text-payment-amount">
-                ${totalAmount}
+                ₹{totalAmount}
               </p>
             </div>
 
@@ -544,7 +544,7 @@ export default function Order() {
                 <div className="flex items-start gap-2 text-sm">
                   <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</span>
                   <span className="text-muted-foreground">
-                    Enter exact amount: <span className="font-semibold text-foreground">${totalAmount}</span> and complete payment
+                    Enter exact amount: <span className="font-semibold text-foreground">₹{totalAmount}</span> and complete payment
                   </span>
                 </div>
                 <div className="flex items-start gap-2 text-sm">

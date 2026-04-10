@@ -234,7 +234,7 @@ export default function Landing() {
                   </div>
                   <div className="mb-2">
                     <span className="text-3xl font-bold text-foreground" data-testid={`text-service-price-${pkg.id}`}>
-                      ${pkg.price}
+                      ₹{pkg.price}
                     </span>
                     <span className="text-muted-foreground text-sm ml-1">one-time</span>
                   </div>
